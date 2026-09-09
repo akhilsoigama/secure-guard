@@ -1,0 +1,7 @@
+rules:
+  - id: generic-security-rules
+    patterns:
+      - pattern: "eval(...)"
+    message: "Avoid using eval(). It can lead to arbitrary code execution."
+    languages: [javascript, typescript]
+    severity: ERROR

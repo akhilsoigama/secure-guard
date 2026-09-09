@@ -1,0 +1,16 @@
+{
+  "name": "secure-guard",
+  "version": "1.0.0",
+  "description": "Monorepo for Secure-Guard",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "pnpm -r run build",
+    "scan:sast": "semgrep scan --config .semgrep.yml",
+    "scan:secrets": "gitleaks detect -v",
+    "scan:osv": "osv-scanner -r ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

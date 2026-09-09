@@ -1,0 +1,9 @@
+title: "gitleaks config"
+# Minimal gitleaks config, you can customize this or rely on default gitleaks rules.
+[allowlist]
+description = "Global allowlist"
+paths = [
+    '''gitleaks\.toml''',
+    '''package-lock\.json''',
+    '''zap-reports/.*'''
+]
