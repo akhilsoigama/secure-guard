@@ -1,0 +1,40 @@
+import type { Secret } from './types';
+
+export const mockSecrets: Secret[] = [
+  {
+    id: 'sec-001',
+    type: 'Stripe Secret Key',
+    file: '.env',
+    line: 4,
+    severity: 'critical',
+    description: 'Live Stripe secret key exposed in client-accessible environment variable with NEXT_PUBLIC_ prefix.',
+    maskedValue: 'sk_live_••••••••••••••••••••••••••••••',
+    envKey: 'NEXT_PUBLIC_STRIPE_SECRET_KEY',
+    recommendation: 'Remove the NEXT_PUBLIC_ prefix. Move the key to a server-side-only environment variable. Revoke this key immediately in the Stripe dashboard and generate a new one.',
+    status: 'open',
+  },
+  {
+    id: 'sec-002',
+    type: 'AWS Access Key',
+    file: 'src/config/aws.js',
+    line: 12,
+    severity: 'critical',
+    description: 'AWS access key ID and secret access key hardcoded directly in source code. This file is likely committed to version control.',
+    maskedValue: 'AKIA••••••••••••••••',
+    envKey: 'AWS_ACCESS_KEY_ID',
+    recommendation: 'Immediately revoke this AWS key pair in IAM. Use IAM roles for EC2/Lambda instead of static credentials. If you must use access keys, store them in AWS Secrets Manager or environment variables, never in code.',
+    status: 'open',
+  },
+  {
+    id: 'sec-003',
+    type: 'JWT Secret',
+    file: 'src/middleware/auth.js',
+    line: 8,
+    severity: 'high',
+    description: 'JWT signing secret is hardcoded as a short, predictable string. Weak secrets allow token forgery attacks.',
+    maskedValue: '"mysecret123"',
+    envKey: 'JWT_SECRET',
+    recommendation: 'Move JWT_SECRET to an environment variable. Use a cryptographically random secret of at least 256 bits (32 bytes). Generate with: openssl rand -hex 32',
+    status: 'open',
+  },
+];
