@@ -1,1 +1,16 @@
 node_modules
+.env
+.env.*
+!.env.example
+dist
+build
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+zap-reports/
+zap-report.html
+*.log
