@@ -9,23 +9,16 @@ export interface AIProvider {
 
 export { AIExplanation };
 export class GroqProvider implements AIProvider {
-  private openai: OpenAI | null = null;
+  private openai: OpenAI;
 
   constructor() {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (apiKey) {
-      this.openai = new OpenAI({ 
-        apiKey,
-        baseURL: 'https://api.groq.com/openai/v1' 
-      });
-    }
+    this.openai = new OpenAI({ 
+      apiKey: 'ollama', // API key is not required for Ollama
+      baseURL: process.env.OLLAMA_URL || 'http://127.0.0.1:11434/v1' 
+    });
   }
 
   async explain(finding: Finding): Promise<AIExplanation | null> {
-    if (!this.openai) {
-      return null;
-    }
-
     const prompt = `
 You are an expert Application Security Engineer.
 Analyze this vulnerability finding and provide an explanation.
@@ -52,7 +45,7 @@ Respond ONLY with valid JSON in the following format:
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'llama-3.1-70b-versatile',
+        model: process.env.OLLAMA_MODEL || 'llama3',
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' }
       });
