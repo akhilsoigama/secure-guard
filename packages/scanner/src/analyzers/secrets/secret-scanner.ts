@@ -20,11 +20,10 @@ export class SecretScanner {
             id: crypto.randomUUID(),
             ruleId: 'SECRET-001',
             title: `Hardcoded Secret Detected: ${pattern.name}`,
-            severity: Severity.CRITICAL,
+            severity: 'CRITICAL',
             confidence: 0.9,
             file: filePath,
             line: i + 1,
-            column: match.index + 1,
             codeSnippet: line.replace(match[0], '********'), // Redact secret
             description: `Detected a hardcoded ${pattern.name} in the source code.`,
             risk: 'Hardcoded secrets can be easily extracted by attackers, leading to unauthorized access.',

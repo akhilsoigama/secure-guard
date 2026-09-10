@@ -4,13 +4,19 @@ import { getSeverityWeight } from '../findings/severity';
 export interface ScoreResult {
   score: number;
   maxScore: number;
-  breakdown: Record<string, number>;
+  breakdown: {
+    CRITICAL: number;
+    HIGH: number;
+    MEDIUM: number;
+    LOW: number;
+    INFO: number;
+  };
 }
 
 export function calculateScore(findings: Finding[]): ScoreResult {
   const maxScore = 100;
   let penalty = 0;
-  const breakdown: Record<string, number> = {
+  const breakdown = {
     CRITICAL: 0,
     HIGH: 0,
     MEDIUM: 0,

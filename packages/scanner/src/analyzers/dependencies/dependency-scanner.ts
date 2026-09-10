@@ -44,11 +44,10 @@ export class NpmDependencyScanner {
              id: crypto.randomUUID(),
              ruleId: 'DEP-001',
              title: `Vulnerable/Compromised Dependency: ${pkgName}`,
-             severity: vuln.severity === 'CRITICAL' ? Severity.CRITICAL : Severity.HIGH,
+             severity: vuln.severity === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
              confidence: 0.95,
              file: 'package.json',
              line: 1, // simplified for MVP
-             column: 1,
              codeSnippet: `"${pkgName}": "${version}"`,
              description: vuln.description,
              risk: 'Using compromised or vulnerable dependencies can lead to full system compromise or data exfiltration.',

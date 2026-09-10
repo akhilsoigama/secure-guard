@@ -11,6 +11,18 @@ import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
 
+const ScansController = () => import('#controllers/scans_controller')
+const FindingsController = () => import('#controllers/findings_controller')
+
+router.group(() => {
+  router.post('/scans', [ScansController, 'create'])
+  router.get('/scans/:id', [ScansController, 'show'])
+  router.get('/scans/:id/findings', [ScansController, 'getFindings'])
+  router.get('/scans/:id/score', [ScansController, 'getScore'])
+
+  router.post('/findings/:id/explain', [FindingsController, 'explain'])
+}).prefix('/api')
+
 router.get('/', () => {
   return { hello: 'world' }
 })

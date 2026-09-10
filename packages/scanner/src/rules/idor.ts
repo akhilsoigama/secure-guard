@@ -52,11 +52,10 @@ export class IdorRule implements Rule {
                         id: crypto.randomUUID(),
                         ruleId: this.id,
                         title: this.name,
-                        severity: Severity.HIGH,
+                        severity: 'HIGH',
                         confidence: 0.6, // IDOR is notoriously hard to detect via AST without full data flow, so lower confidence
                         file: context.file,
                         line: handlerNode.loc.start.line,
-                        column: handlerNode.loc.start.column,
                         codeSnippet: context.content.split('\n')[handlerNode.loc.start.line - 1].trim(),
                         description: 'A route handler retrieves a resource using a request parameter but does not seem to perform an ownership or authorization check.',
                         risk: 'An attacker could modify the ID parameter to access or manipulate resources belonging to other users.',

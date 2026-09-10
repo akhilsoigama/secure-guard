@@ -7,6 +7,66 @@ import type { InferInput, SimpleError } from '@vinejs/vine/types'
 export type ParamValue = string | number | bigint | boolean
 
 export interface Registry {
+  'scans.create': {
+    methods: ["POST"]
+    pattern: '/api/scans'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['create']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['create']>>>
+    }
+  }
+  'scans.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/scans/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['show']>>>
+    }
+  }
+  'scans.get_findings': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/scans/:id/findings'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['getFindings']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['getFindings']>>>
+    }
+  }
+  'scans.get_score': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/scans/:id/score'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['getScore']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/scans_controller').default['getScore']>>>
+    }
+  }
+  'findings.explain': {
+    methods: ["POST"]
+    pattern: '/api/findings/:id/explain'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/findings_controller').default['explain']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/findings_controller').default['explain']>>>
+    }
+  }
   'auth.new_account.store': {
     methods: ["POST"]
     pattern: '/api/v1/auth/signup'

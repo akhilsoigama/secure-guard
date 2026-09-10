@@ -38,11 +38,10 @@ export class SsrfRule implements Rule {
                 id: crypto.randomUUID(),
                 ruleId: this.id,
                 title: this.name,
-                severity: Severity.CRITICAL,
+                severity: 'CRITICAL',
                 confidence: 0.8, // Without data flow, confidence is moderate-high
                 file: context.file,
                 line: node.loc.start.line,
-                column: node.loc.start.column,
                 codeSnippet: context.content.split('\n')[node.loc.start.line - 1].trim(),
                 description: 'The URL passed to an HTTP client appears to be dynamic. If this originates from user input, it may lead to SSRF.',
                 risk: 'An attacker could force the server to make requests to internal services, cloud metadata endpoints, or other unintended destinations.',

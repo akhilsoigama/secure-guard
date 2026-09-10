@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { ProjectScanner } from '../scanner/project-scanner';
-import { OpenAIProvider } from '../ai/explanation-service';
+import { GroqProvider } from '../ai/explanation-service';
 import { calculateScore } from '../scoring/security-score';
 import { TerminalReporter } from '../reporting/terminal-reporter';
 import * as fs from 'fs';
@@ -28,13 +28,13 @@ program.command('scan')
     const findings = await scanner.scan(targetPath);
 
     // AI Explanation Layer
-    if (!options.noAi && process.env.OPENAI_API_KEY) {
-      const aiProvider = new OpenAIProvider();
+    if (!options.noAi && process.env.GROQ_API_KEY) {
+      const aiProvider = new GroqProvider();
       for (const finding of findings) {
         if (finding.severity === 'CRITICAL' || finding.severity === 'HIGH') {
            const explanation = await aiProvider.explain(finding);
            if (explanation) {
-             finding.metadata = { ...finding.metadata, aiExplanation: explanation };
+             finding.aiExplanation = explanation;
            }
         }
       }

@@ -1,199 +1,177 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, AlertCircle, AlertTriangle, Package, KeyRound, ArrowRight, RefreshCw, Info } from 'lucide-react';
-import { useApp } from '../context/AppContext';
-import { StatCard } from '../components/ui/StatCard';
-import { SecurityScoreRing } from '../components/ui/SecurityScoreRing';
-import { SecurityTrendChart } from '../components/charts/SecurityTrendChart';
-import { VulnDistributionChart } from '../components/charts/VulnDistributionChart';
-import { SeverityBadge } from '../components/ui/SeverityBadge';
-import { mockScanTrend } from '../data/mockScanHistory';
-import { mockFindings } from '../data/mockFindings';
+import { apiClient } from '../api/client';
+import { Shield, Play, Loader2, Activity, FileLock2, ServerCrash, CheckCircle2, History as HistoryIcon } from 'lucide-react';
 
 export function Dashboard() {
-  const { securityScore, fixedFindings } = useApp();
+  const [path, setPath] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanId, setScanId] = useState<string | null>(null);
+  const [progress, setProgress] = useState({ message: '', percent: 0 });
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const topFindings = mockFindings.filter(f => !fixedFindings.has(f.id)).slice(0, 5);
+  const handleScan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!path.trim()) {
+      setError('Please enter a project path');
+      return;
+    }
+
+    try {
+      setIsScanning(true);
+      const scan = await apiClient.createScan(path, true);
+      setScanId(scan.id);
+    } catch (err: any) {
+      setError(err.message || 'Failed to start scan');
+      setIsScanning(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!scanId || !isScanning) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const scan = await apiClient.getScan(scanId);
+        if (scan.progress) {
+          setProgress(scan.progress);
+        }
+        if (scan.status === 'completed') {
+          clearInterval(interval);
+          setIsScanning(false);
+          navigate(`/report/${scanId}`);
+        } else if (scan.status === 'failed') {
+          clearInterval(interval);
+          setIsScanning(false);
+          setError('Scan failed: ' + (scan.progress?.message || 'Internal error'));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [scanId, isScanning, navigate]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
-      {/* Page header */}
-      <div className="flex items-start justify-between">
+    <div className="space-y-8 animate-fade-in">
+      
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Security Overview</h1>
-          <p className="text-slate-500 mt-1 text-sm">Understand your project's security posture at a glance.</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/scan')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-          >
-            <RefreshCw size={15} />
-            Run New Scan
-          </button>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Security Dashboard</h1>
+          <p className="mt-1 text-slate-400">Overview of your application security posture</p>
         </div>
       </div>
 
-      {/* Top stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Critical Issues"
-          value={2}
-          icon={<AlertCircle size={20} className="text-red-500" />}
-          color="critical"
-          onClick={() => navigate('/findings')}
-          subtitle="Requires immediate action"
-        />
-        <StatCard
-          title="High Issues"
-          value={3}
-          icon={<AlertTriangle size={20} className="text-orange-500" />}
-          color="high"
-          onClick={() => navigate('/findings')}
-          subtitle="Fix before production"
-        />
-        <StatCard
-          title="Medium Issues"
-          value={2}
-          icon={<Info size={20} className="text-amber-500" />}
-          color="medium"
-          onClick={() => navigate('/findings')}
-          subtitle="Plan remediation"
-        />
-        <StatCard
-          title="Low Issues"
-          value={1}
-          icon={<Shield size={20} className="text-blue-500" />}
-          color="low"
-          onClick={() => navigate('/findings')}
-          subtitle="Informational"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="p-3 bg-indigo-500/10 rounded-xl">
+            <Activity className="w-6 h-6 text-indigo-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400">Total Scans</p>
+            <p className="text-2xl font-bold text-white mt-1">1,248</p>
+          </div>
+        </div>
+        
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="p-3 bg-red-500/10 rounded-xl">
+            <FileLock2 className="w-6 h-6 text-red-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400">Critical Issues</p>
+            <p className="text-2xl font-bold text-white mt-1">12</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="p-3 bg-yellow-500/10 rounded-xl">
+            <ServerCrash className="w-6 h-6 text-yellow-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400">High Issues</p>
+            <p className="text-2xl font-bold text-white mt-1">45</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="p-3 bg-green-500/10 rounded-xl">
+            <CheckCircle2 className="w-6 h-6 text-green-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400">Resolved</p>
+            <p className="text-2xl font-bold text-white mt-1">892</p>
+          </div>
+        </div>
       </div>
 
-      {/* Second row: score + trend */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Security Score */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col items-center gap-4">
-          <div className="w-full flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-800">Security Score</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* New Scan Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl shadow-black/20">
+          <div className="flex items-center gap-3 mb-6">
+            <Shield className="w-6 h-6 text-indigo-500" />
+            <h2 className="text-xl font-semibold text-white">Start New Scan</h2>
+          </div>
+          <p className="text-slate-400 text-sm mb-6">Enter the absolute path to your project directory to initiate a comprehensive AI-powered security analysis.</p>
+
+          <form className="space-y-6" onSubmit={handleScan}>
+            <div>
+              <label htmlFor="path" className="block text-sm font-medium text-slate-300 mb-2">Project Path</label>
+              <input
+                id="path"
+                name="path"
+                type="text"
+                required
+                disabled={isScanning}
+                className="block w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-inner"
+                placeholder="/absolute/path/to/project"
+                value={path}
+                onChange={(e) => setPath(e.target.value)}
+              />
+            </div>
+            
+            {error && <div className="text-red-400 text-sm font-medium bg-red-950/50 p-3 rounded-xl border border-red-900/50 flex items-center gap-2"><ServerCrash className="w-4 h-4"/> {error}</div>}
+
             <button
-              type="button"
-              onClick={() => navigate('/security-score')}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              type="submit"
+              disabled={isScanning}
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-indigo-500/25"
             >
-              Details <ArrowRight size={12} />
-            </button>
-          </div>
-          <SecurityScoreRing score={securityScore.total} size={180} />
-          <div className="w-full grid grid-cols-2 gap-2">
-            {[
-              { label: 'Code', value: securityScore.codeSecurity },
-              { label: 'Dependencies', value: securityScore.dependencySecurity },
-              { label: 'Secrets', value: securityScore.secretSecurity },
-              { label: 'API Security', value: securityScore.apiSecurity },
-            ].map(item => (
-              <div key={item.label} className="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-lg">
-                <span className="text-xs text-slate-600">{item.label}</span>
-                <span className={`text-sm font-bold ${item.value >= 70 ? 'text-green-600' : item.value >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
-                  {item.value}
+              {isScanning ? (
+                <span className="flex items-center space-x-2">
+                  <Loader2 className="animate-spin h-5 w-5" />
+                  <span>{progress.message || 'Scanning...'} {progress.percent}%</span>
                 </span>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <span className="flex items-center space-x-2">
+                  <Play className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  <span>Run Security Analysis</span>
+                </span>
+              )}
+            </button>
+            
+            {isScanning && (
+               <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-4">
+                  <div 
+                     className="bg-indigo-500 h-2 rounded-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(99,102,241,0.8)]"
+                     style={{ width: `${progress.percent}%` }}
+                  ></div>
+               </div>
+            )}
+          </form>
         </div>
 
-        {/* Trend chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-slate-800">Security Score Trend</h2>
-            <span className="text-xs text-slate-400">Last 5 scans</span>
-          </div>
-          <SecurityTrendChart data={mockScanTrend} />
-        </div>
-      </div>
-
-      {/* Third row: distribution + dependencies + secrets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Vulnerability Distribution */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Vulnerability Distribution</h2>
-          <VulnDistributionChart />
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {[
-              { label: 'Critical', count: 2, color: 'bg-red-500' },
-              { label: 'High', count: 3, color: 'bg-orange-500' },
-              { label: 'Medium', count: 2, color: 'bg-amber-500' },
-              { label: 'Low', count: 1, color: 'bg-blue-500' },
-            ].map(item => (
-              <div key={item.label} className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${item.color}`} />
-                <span className="text-xs text-slate-600">{item.label}: <strong>{item.count}</strong></span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dependencies + Secrets */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <StatCard
-              title="Total Dependencies"
-              value={127}
-              subtitle="8 vulnerable · 14 outdated"
-              icon={<Package size={20} className="text-blue-500" />}
-              onClick={() => navigate('/dependencies')}
-            />
-            <StatCard
-              title="Secrets Detected"
-              value={3}
-              subtitle="2 critical · 1 warning"
-              icon={<KeyRound size={20} className="text-red-500" />}
-              color="critical"
-              onClick={() => navigate('/secrets')}
-            />
-          </div>
-
-          {/* Top priority findings */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-slate-800">Top Priority Findings</h2>
-              <button
-                type="button"
-                onClick={() => navigate('/findings')}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-              >
-                View all <ArrowRight size={12} />
-              </button>
-            </div>
-            <div className="space-y-2">
-              {topFindings.map(finding => (
-                <div
-                  key={finding.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer group"
-                  onClick={() => navigate(`/findings/${finding.id}`)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && navigate(`/findings/${finding.id}`)}
-                  aria-label={`View finding: ${finding.title}`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <SeverityBadge severity={finding.severity} size="sm" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-800 truncate">{finding.title}</p>
-                      <p className="text-xs text-slate-500 font-mono truncate">{finding.file}:{finding.line}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); navigate(`/findings/${finding.id}`); }}
-                    className="flex-shrink-0 text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-50 transition-colors opacity-0 group-hover:opacity-100"
-                  >
-                    Analyze
-                  </button>
-                </div>
-              ))}
-            </div>
+        {/* Recent Scans Placeholder */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col">
+          <h2 className="text-xl font-semibold text-white mb-6">Recent Activity</h2>
+          <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-800 rounded-xl bg-slate-950/50">
+             <div className="text-center p-6">
+                <HistoryIcon className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+                <h3 className="text-slate-300 font-medium mb-1">No recent scans</h3>
+                <p className="text-sm text-slate-500">Run a new scan to see your history here.</p>
+             </div>
           </div>
         </div>
       </div>

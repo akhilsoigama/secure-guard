@@ -2,7 +2,7 @@
   "name": "secureguard",
   "version": "1.0.0",
   "description": "SecureGuard Core Engine",
-  "main": "dist/cli/secureguard.js",
+  "main": "dist/index.js",
   "bin": {
     "secureguard": "./bin/secureguard.js"
   },
@@ -12,6 +12,7 @@
     "start": "ts-node src/cli/secureguard.ts"
   },
   "dependencies": {
+    "@secureguard/shared": "workspace:*",
     "@typescript-eslint/typescript-estree": "^8.5.0",
     "chalk": "^4.1.2",
     "commander": "^12.1.0",

@@ -6,6 +6,36 @@ import type { ApiDefinition } from './tree.d.ts'
 const placeholder: any = {}
 
 const routes = {
+  'scans.create': {
+    methods: ["POST"],
+    pattern: '/api/scans',
+    tokens: [{"old":"/api/scans","type":0,"val":"api","end":""},{"old":"/api/scans","type":0,"val":"scans","end":""}],
+    types: placeholder as Registry['scans.create']['types'],
+  },
+  'scans.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/scans/:id',
+    tokens: [{"old":"/api/scans/:id","type":0,"val":"api","end":""},{"old":"/api/scans/:id","type":0,"val":"scans","end":""},{"old":"/api/scans/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['scans.show']['types'],
+  },
+  'scans.get_findings': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/scans/:id/findings',
+    tokens: [{"old":"/api/scans/:id/findings","type":0,"val":"api","end":""},{"old":"/api/scans/:id/findings","type":0,"val":"scans","end":""},{"old":"/api/scans/:id/findings","type":1,"val":"id","end":""},{"old":"/api/scans/:id/findings","type":0,"val":"findings","end":""}],
+    types: placeholder as Registry['scans.get_findings']['types'],
+  },
+  'scans.get_score': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/scans/:id/score',
+    tokens: [{"old":"/api/scans/:id/score","type":0,"val":"api","end":""},{"old":"/api/scans/:id/score","type":0,"val":"scans","end":""},{"old":"/api/scans/:id/score","type":1,"val":"id","end":""},{"old":"/api/scans/:id/score","type":0,"val":"score","end":""}],
+    types: placeholder as Registry['scans.get_score']['types'],
+  },
+  'findings.explain': {
+    methods: ["POST"],
+    pattern: '/api/findings/:id/explain',
+    tokens: [{"old":"/api/findings/:id/explain","type":0,"val":"api","end":""},{"old":"/api/findings/:id/explain","type":0,"val":"findings","end":""},{"old":"/api/findings/:id/explain","type":1,"val":"id","end":""},{"old":"/api/findings/:id/explain","type":0,"val":"explain","end":""}],
+    types: placeholder as Registry['findings.explain']['types'],
+  },
   'auth.new_account.store': {
     methods: ["POST"],
     pattern: '/api/v1/auth/signup',

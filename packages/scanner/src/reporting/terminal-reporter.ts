@@ -26,11 +26,11 @@ export class TerminalReporter {
       console.log(`${chalk.bold('Risk:')}\n${finding.risk}\n`);
       console.log(`${chalk.bold('Fix:')}\n${finding.recommendation}\n`);
       
-      if (finding.metadata?.aiExplanation) {
+      if (finding.aiExplanation) {
          console.log(chalk.cyan('--- AI Explanation ---'));
-         console.log(finding.metadata.aiExplanation.summary);
+         console.log(finding.aiExplanation.summary);
          console.log(chalk.bold('Secure Example:'));
-         console.log(finding.metadata.aiExplanation.secureCodeExample);
+         console.log(finding.aiExplanation.secureCodeExample);
          console.log(chalk.cyan('----------------------\n'));
       } else {
         console.log('────────────────────────────\n');

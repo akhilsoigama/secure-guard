@@ -1,26 +1,23 @@
 import OpenAI from 'openai';
 import { Finding } from '../findings/finding';
 
-export interface AIExplanation {
-  summary: string;
-  whyItMatters: string;
-  attackerImpact: string;
-  fix: string;
-  secureCodeExample: string;
-  confidence: number;
-}
+import { AIExplanation } from '@secureguard/shared';
 
 export interface AIProvider {
   explain(finding: Finding): Promise<AIExplanation | null>;
 }
 
-export class OpenAIProvider implements AIProvider {
+export { AIExplanation };
+export class GroqProvider implements AIProvider {
   private openai: OpenAI | null = null;
 
   constructor() {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (apiKey) {
-      this.openai = new OpenAI({ apiKey });
+      this.openai = new OpenAI({ 
+        apiKey,
+        baseURL: 'https://api.groq.com/openai/v1' 
+      });
     }
   }
 
@@ -44,17 +41,18 @@ ${finding.codeSnippet}
 Respond ONLY with valid JSON in the following format:
 {
   "summary": "...",
+  "whatIsWrong": "...",
   "whyItMatters": "...",
   "attackerImpact": "...",
-  "fix": "...",
+  "recommendation": "...",
   "secureCodeExample": "...",
-  "confidence": 0.95
+  "explanation": "..."
 }
 `;
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'llama-3.1-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' }
       });
